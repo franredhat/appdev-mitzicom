@@ -51,13 +51,6 @@ RUN yum -y install skopeo apb && \
 USER 1001
 EOF
 
-oc login -u frodrigu-redhat.com -p a8LattXIsGtwbe7fH96VNBC6jvdlJJu7-C-5jMNyri4 master.na39.openshift.opentlc.com --insecure-skip-tls-verify  
-docker build . -t docker-registry-default.apps.na39.openshift.opentlc.com/${GUID}-jenkins/jenkins-slave-appdev:v3.9
-docker login -u frodrigu-redhat.com -p a8LattXIsGtwbe7fH96VNBC6jvdlJJu7-C-5jMNyri4 docker-registry-default.apps.na39.openshift.opentlc.com
-docker push docker-registry-default.apps.na39.openshift.opentlc.com/xyz-jenkins/jenkins-slave-appdev:v3.9
-skopeo copy --dest-tls-verify=false --dest-creds=$(oc whoami):$(oc whoami -t) docker-daemon:docker-registry-default.apps.na39.openshift.opentlc.com/${GUID}-jenkins/jenkins-slave-appdev:v3.9 docker://docker-registry-default.apps.na39.openshift.opentlc.com/${GUID}-jenkins/jenkins-slave-appdev:v3.9
-
-
 # Code to set up the Jenkins project to execute the
 # three pipelines.
 # This will need to also build the custom Maven Slave Pod
