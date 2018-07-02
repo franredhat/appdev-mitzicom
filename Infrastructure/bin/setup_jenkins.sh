@@ -12,6 +12,52 @@ REPO=$2
 CLUSTER=$3
 echo "Setting up Jenkins in project ${GUID}-jenkins from Git Repo ${REPO} for Cluster ${CLUSTER}"
 
+oc new-app jenkins-persistent --param ENABLE_OAUTH=true --param MEMORY_LIMIT=2Gi --param VOLUME_CAPACITY=4Gi -n ${GUID}-jenkins
+
+cat <<EOF > /etc/containers/registries.conf
+# This is a system-wide configuration file used to
+# keep track of registries for various container backends.
+# It adheres to TOML format and does not support recursive
+# lists of registries.
+
+# The default location for this configuration file is /etc/containers/registries.conf.
+
+# The only valid categories are: 'registries.search', 'registries.insecure', 
+# and 'registries.block'.
+
+[registries.search]
+registries = ['registry.access.redhat.com']
+
+# If you need to access insecure registries, add the registry's fully-qualified name.
+# An insecure registry is one that does not have a valid SSL certificate or only does HTTP.
+[registries.insecure]
+registries = ['docker-registry-default.apps.0afd.openshift.opentlc.com']
+
+
+# If you need to block pull access from a registry, uncomment the section below
+# and add the registries fully-qualified name.
+#
+# Docker only
+[registries.block]
+registries = []
+EOF
+
+
+cat <<EOF > $HOME/dockerfile
+FROM docker.io/openshift/jenkins-slave-maven-centos7:v3.9
+USER root
+RUN yum -y install skopeo apb && \
+    yum clean all
+USER 1001
+EOF
+
+oc login -u frodrigu-redhat.com -p a8LattXIsGtwbe7fH96VNBC6jvdlJJu7-C-5jMNyri4 master.na39.openshift.opentlc.com --insecure-skip-tls-verify  
+docker build . -t docker-registry-default.apps.na39.openshift.opentlc.com/${GUID}-jenkins/jenkins-slave-appdev:v3.9
+docker login -u frodrigu-redhat.com -p a8LattXIsGtwbe7fH96VNBC6jvdlJJu7-C-5jMNyri4 docker-registry-default.apps.na39.openshift.opentlc.com
+docker push docker-registry-default.apps.na39.openshift.opentlc.com/xyz-jenkins/jenkins-slave-appdev:v3.9
+skopeo copy --dest-tls-verify=false --dest-creds=$(oc whoami):$(oc whoami -t) docker-daemon:docker-registry-default.apps.na39.openshift.opentlc.com/${GUID}-jenkins/jenkins-slave-appdev:v3.9 docker://docker-registry-default.apps.na39.openshift.opentlc.com/${GUID}-jenkins/jenkins-slave-appdev:v3.9
+
+
 # Code to set up the Jenkins project to execute the
 # three pipelines.
 # This will need to also build the custom Maven Slave Pod
