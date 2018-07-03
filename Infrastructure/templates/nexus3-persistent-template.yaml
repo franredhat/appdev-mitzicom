@@ -68,10 +68,12 @@ objects:
             successThreshold: 1
             timeoutSeconds: 1
           resources:
-            limits:
-              memory: ${MAX_MEMORY}
             requests:
-              memory: 512Mi
+              cpu: 1
+              memory: 1Gi
+            limits:
+              cpu: 1
+              memory: 2Gi
           terminationMessagePath: /dev/termination-log
           volumeMounts:
           - mountPath: /nexus-data
@@ -154,4 +156,4 @@ parameters:
   displayName: Max Memory
   name: MAX_MEMORY
   required: true
-  value: 1536Mi
+  value: 2Gi
