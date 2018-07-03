@@ -12,7 +12,7 @@ echo "Setting Up Nexus in Project $GUID-nexus"
 oc new-app -f https://raw.githubusercontent.com/franredhat/appdev-mitzicom/master/Infrastructure/templates/nexus3-persistent-template.yaml -n $GUID-nexus
 
 echo "Waiting until Nexus can be configured"
-sleep 400
+sleep 500
 
 echo "Configuring Nexus with Wolfgang repositories"
 curl -o setup_nexus3.sh -s https://raw.githubusercontent.com/wkulhanek/ocp_advanced_development_resources/master/nexus/setup_nexus3.sh
