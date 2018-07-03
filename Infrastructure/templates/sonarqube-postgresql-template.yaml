@@ -173,9 +173,6 @@ objects:
       app: sonarqube
       deploymentconfig: postgresql-sonarqube
     strategy:
-      recreateParams:
-        timeoutSeconds: 600
-      resources: {}
       type: Recreate
     template:
       metadata:
