@@ -12,18 +12,9 @@ echo "Setting Up Nexus in Project $GUID-nexus"
 oc new-app -f https://raw.githubusercontent.com/franredhat/appdev-mitzicom/master/Infrastructure/templates/nexus3-persistent-template.yaml -n $GUID-nexus
 
 echo "Waiting until Nexus can be configured"
-while : ; do
-  echo "Checking if Nexus is Ready..."
-  oc get pod -n ${GUID}-nexus|grep '\-2\-'|grep -v deploy|grep "1/1"
-  [[ "$?" == "1" ]] || break
-  echo "...no. Sleeping 10 seconds."
-done
+sleep 400
 
-echo "Setting up Nexus readiness and liveness probes"
-oc set probe dc/nexus3 --liveness --failure-threshold 3 --initial-delay-seconds 60 -- echo ok -n $GUID-nexus
-oc set probe dc/nexus3 --readiness --failure-threshold 3 --initial-delay-seconds 60 --get-url=http://:8081/repository/maven-public/ -n $GUID-nexus
-
-echo "Configuring Nexus with repositories"
+echo "Configuring Nexus with Wolfgang repositories"
 curl -o setup_nexus3.sh -s https://raw.githubusercontent.com/wkulhanek/ocp_advanced_development_resources/master/nexus/setup_nexus3.sh
 chmod +x setup_nexus3.sh
 ./setup_nexus3.sh admin admin123 http://$(oc get route nexus3 --template='{{ .spec.host }}' -n $GUID-nexus)
