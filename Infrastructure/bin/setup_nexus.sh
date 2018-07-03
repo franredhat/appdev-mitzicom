@@ -11,8 +11,14 @@ GUID=$1
 echo "Setting Up Nexus in Project $GUID-nexus"
 oc new-app -f https://raw.githubusercontent.com/franredhat/appdev-mitzicom/master/Infrastructure/templates/nexus3-persistent-template.yaml -n $GUID-nexus
 
-echo "Waiting 10 minutes until Nexus can be configured"
-sleep 600
+echo "Waiting until Nexus can be configured"
+while : ; do
+  echo "Checking if Nexus is Ready..."
+  oc get pod -n ${GUID}-nexus|grep '\-2\-'|grep -v deploy|grep "1/1"
+  [[ "$?" == "1" ]] || break
+  echo "...no. Sleeping 10 seconds."
+  sleep 10
+done
 
 echo "Setting up Nexus readiness and liveness probes"
 oc set probe dc/nexus3 --liveness --failure-threshold 3 --initial-delay-seconds 60 -- echo ok -n $GUID-nexus
