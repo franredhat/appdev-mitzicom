@@ -31,10 +31,6 @@ objects:
     selector:
       deploymentconfig: ${SERVICE_NAME}
     strategy:
-      recreateParams:
-        timeoutSeconds: 600
-        post:
-          failurePolicy: Abort
       type: Recreate
     template:
       metadata:
