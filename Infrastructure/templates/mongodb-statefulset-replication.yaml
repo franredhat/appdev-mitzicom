@@ -11,57 +11,48 @@ parameters:
     displayName: "MongoDB Connection Username"
     description: "Username for MongoDB user that will be used for accessing the database."
     value: mongodb
-    required: true
 
   - name: MONGODB_PASSWORD
     displayName: "MongoDB Connection Password"
     description: "Password for the MongoDB connection user."
     value: mongodb
-    required: true
 
   - name: MONGODB_DATABASE
     displayName: "MongoDB Database Name"
     description: "Name of the MongoDB database accessed."
     value: parks
-    required: true
 
   - name: MONGODB_ADMIN_PASSWORD
     displayName: "MongoDB Admin Password"
     description: "Password for the database admin user."
     generate: expression
     from: "[a-zA-Z0-9]{16}"
-    required: true
 
   - name: MONGODB_REPLICA_NAME
     displayName: "Replica Set Name"
     description: "The name of the replica set."
     value: rs0
-    required: true
 
   - name: MONGODB_KEYFILE_VALUE
     displayName: "Keyfile Content"
     description: "The value of the MongoDB keyfile (https://docs.mongodb.com/manual/core/security-internal-authentication/#internal-auth-keyfile)."
     generate: expression
     from: "[a-zA-Z0-9]{255}"
-    required: true
 
   - name: MONGODB_IMAGE
     displayName: "MongoDB Docker Image"
     description: "A reference to a supported MongoDB Docker image."
     value: "registry.access.redhat.com/rhscl/mongodb-32-rhel7:3.2"
-    required: true
 
   - name: MONGODB_SERVICE_NAME
     displayName: "OpenShift Service Name"
     description: "The name of the OpenShift Service exposed for the database."
     value: mongodb
-    required: true
 
   - name: VOLUME_CAPACITY
     displayName: "Volume Capacity"
     description: "Volume space available for data, e.g. 512Mi, 2Gi."
     value: "1Gi"
-    required: true
 
   - name: MEMORY_LIMIT
     displayName: "Memory Limit"
