@@ -8,4 +8,4 @@ spec:
       uri: "https://github.com/franredhat/appdev-mitzicom"
   strategy:
     jenkinsPipelineStrategy:
-      jenkinsfilePath: appdev-mitzicom/Nationalparks/Jenkinsfile
+      jenkinsfilePath: Nationalparks/Jenkinsfile
