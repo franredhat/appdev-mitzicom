@@ -52,13 +52,7 @@ EOF
 
 # Docker build
 
-docker build . -t docker-registry-default.apps.na39.openshift.opentlc.com/$GUID-jenkins/jenkins-slave-appdev:v3.9
-
-docker login -u frodrigu-redhat.com -p JTjE2QIuolTxp6Efg3dA2r3namX6Wz09kII4IV4lnmk docker-registry-default.apps.na39.openshift.opentlc.com
-
-docker push docker-registry-default.apps.na39.openshift.opentlc.com/$GUID-jenkins/jenkins-slave-appdev:v3.9
-
-skopeo copy --dest-tls-verify=false --dest-creds=frodrigu-redhat.com:JTjE2QIuolTxp6Efg3dA2r3namX6Wz09kII4IV4lnmk docker-daemon:docker-registry-default.apps.na39.openshift.opentlc.com/$GUID-jenkins/jenkins-slave-appdev:v3.9 docker://docker-registry-default.apps.na39.openshift.opentlc.com/$GUID-jenkins/jenkins-slave-appdev:v3.9
+oc new-build https://raw.githubusercontent.com/franredhat/appdev-mitzicom/master/dockerfile
 
 # Jenkins File Build config
 
