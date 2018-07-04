@@ -15,7 +15,7 @@ podTemplate(
   node('skopeo-pod') {
     echo "GUID: ${GUID}"
     echo "CLUSTER: ${CLUSTER}"
-    
+    git 'https://github.com/franredhat/appdev-mitzicom.git'
     echo "Packaging MLBParks"
     sh "cd MLBParks"
     sh "mvn -s ../nexus_settings.xml clean package -DskipTests=true"
