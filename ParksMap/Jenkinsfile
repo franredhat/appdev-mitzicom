@@ -19,8 +19,8 @@ podTemplate(
     echo "Packaging ParksMap"
     sh "cd ParksMap"
     sh "mvn -s ../nexus_settings.xml clean package -DskipTests=true"
-    echo "ParksMap unit tests"
-    sh "mvn -s ../nexus_settings.xml test"
+    //echo "ParksMap unit tests"
+    //sh "mvn -s ../nexus_settings.xml test"
     
     echo "Running ParksMap Code Analyses"
     sh "mvn -s ../nexus_settings.xml deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::http://nexus-$GUID-nexus.apps.na39.openshift.opentlc.com/repository/releases"
