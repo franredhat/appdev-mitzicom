@@ -1,17 +1,21 @@
+#!groovy
+
 // Jenkinsfile for MLBParks
-podTemplate(
-  label: "skopeo-pod",
-  cloud: "openshift",
-  inheritFrom: "maven",
-  containers: [
-    containerTemplate(
-      name: "jnlp",
-      image: "docker-registry.default.svc:5000/frodrigu-jenkins/jenkins-slave-maven-centos7",
-      resourceRequestMemory: "1Gi",
-      resourceLimitMemory: "2Gi"
-    )
-  ]
-) {
+//podTemplate(
+//  label: "skopeo-pod",
+//  cloud: "openshift",
+//  inheritFrom: "maven",
+//  containers: [
+//    containerTemplate(
+//      name: "jnlp",
+//      image: "docker-registry.default.svc:5000/frodrigu-jenkins/jenkins-slave-maven-centos7",
+//      resourceRequestMemory: "1Gi",
+//      resourceLimitMemory: "2Gi"
+//    )
+//  ]
+//) 
+
+{
   node('skopeo-pod') {
     def GUID = "frodrigu"
     echo "GUID: ${GUID}"
