@@ -44,7 +44,7 @@ EOF
 
 # Docker build
 
-oc new-build https://raw.githubusercontent.com/franredhat/appdev-mitzicom/master/dockerfile
+oc new-app --strategy=docker https://github.com/franredhat/appdev-mitzicom.git
 
 # Jenkins File Build config
 
