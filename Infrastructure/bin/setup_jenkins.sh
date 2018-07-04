@@ -42,7 +42,6 @@ registries = ['docker-registry-default.apps.0afd.openshift.opentlc.com']
 registries = []
 EOF
 
-
 cat <<EOF > $HOME/dockerfile
 FROM docker.io/openshift/jenkins-slave-maven-centos7:v3.9
 USER root
@@ -53,7 +52,13 @@ EOF
 
 # Docker build
 
-docker build . -t docker-registry-default.apps.na39.openshift.opentlc.com/$GUID-jenkins/jenkins-slave-maven-appdev:v3.9
+docker build . -t docker-registry-default.apps.na39.openshift.opentlc.com/$GUID-jenkins/jenkins-slave-appdev:v3.9
+
+docker login -u frodrigu-redhat.com -p JTjE2QIuolTxp6Efg3dA2r3namX6Wz09kII4IV4lnmk docker-registry-default.apps.na39.openshift.opentlc.com
+
+docker push docker-registry-default.apps.na39.openshift.opentlc.com/$GUID-jenkins/jenkins-slave-appdev:v3.9
+
+skopeo copy --dest-tls-verify=false --dest-creds=frodrigu-redhat.com:JTjE2QIuolTxp6Efg3dA2r3namX6Wz09kII4IV4lnmk docker-daemon:docker-registry-default.apps.na39.openshift.opentlc.com/$GUID-jenkins/jenkins-slave-appdev:v3.9 docker://docker-registry-default.apps.na39.openshift.opentlc.com/$GUID-jenkins/jenkins-slave-appdev:v3.9
 
 # Jenkins File Build config
 
