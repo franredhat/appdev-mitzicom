@@ -15,7 +15,6 @@ podTemplate(
   node('skopeo-pod') {
     def GUID = "frodrigu"
     echo "GUID: ${GUID}"
-    echo "CLUSTER: ${CLUSTER}"
     git 'https://github.com/franredhat/appdev-mitzicom.git'
     echo "Packaging Nationalparks"
     sh "cd Nationalparks"
