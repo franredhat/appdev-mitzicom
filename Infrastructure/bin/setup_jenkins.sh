@@ -14,37 +14,9 @@ echo "Setting up Jenkins in project ${GUID}-jenkins from Git Repo ${REPO} for Cl
 
 oc new-app jenkins-persistent --param ENABLE_OAUTH=true --param MEMORY_LIMIT=2Gi --param VOLUME_CAPACITY=4Gi -n ${GUID}-jenkins
 
-cat <<EOF > /etc/containers/registries.conf
-# This is a system-wide configuration file used to
-# keep track of registries for various container backends.
-# It adheres to TOML format and does not support recursive
-# lists of registries.
+# Docker build alternative with new-app
 
-# The default location for this configuration file is /etc/containers/registries.conf.
-
-# The only valid categories are: 'registries.search', 'registries.insecure', 
-# and 'registries.block'.
-
-[registries.search]
-registries = ['registry.access.redhat.com']
-
-# If you need to access insecure registries, add the registry's fully-qualified name.
-# An insecure registry is one that does not have a valid SSL certificate or only does HTTP.
-[registries.insecure]
-registries = ['docker-registry-default.apps.0afd.openshift.opentlc.com']
-
-
-# If you need to block pull access from a registry, uncomment the section below
-# and add the registries fully-qualified name.
-#
-# Docker only
-[registries.block]
-registries = []
-EOF
-
-# Docker build
-
-oc new-app --strategy=docker https://github.com/franredhat/appdev-mitzicom.git
+oc new-app --strategy=docker https://github.com/franredhat/appdev-mitzicom.git -n ${GUID}-jenkins
 
 # Jenkins File Build config
 
