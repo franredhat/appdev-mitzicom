@@ -42,14 +42,6 @@ registries = ['docker-registry-default.apps.0afd.openshift.opentlc.com']
 registries = []
 EOF
 
-cat <<EOF > $HOME/dockerfile
-FROM docker.io/openshift/jenkins-slave-maven-centos7:v3.9
-USER root
-RUN yum -y install skopeo apb && \
-    yum clean all
-USER 1001
-EOF
-
 # Docker build
 
 oc new-build https://raw.githubusercontent.com/franredhat/appdev-mitzicom/master/dockerfile
