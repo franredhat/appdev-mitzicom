@@ -51,6 +51,9 @@ RUN yum -y install skopeo apb && \
 USER 1001
 EOF
 
+# Docker build
+
+docker build . -t docker-registry-default.apps.na39.openshift.opentlc.com/$GUID-jenkins/jenkins-slave-maven-appdev:v3.9
 
 # Jenkins File Build config
 
