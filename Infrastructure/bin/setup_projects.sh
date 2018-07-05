@@ -15,6 +15,9 @@ oc new-project ${GUID}-jenkins    --display-name="${GUID} AdvDev Homework Jenkin
 oc new-project ${GUID}-parks-dev  --display-name="${GUID} AdvDev Homework Parks Development"
 oc new-project ${GUID}-parks-prod --display-name="${GUID} AdvDev Homework Parks Production"
 
+oc policy add-role-to-user edit system:serviceaccount:${GUID}-jenkins:jenkins -n ${GUID}-tasks-dev
+oc policy add-role-to-user edit system:serviceaccount:${GUID}-jenkins:jenkins -n ${GUID}-tasks-dev
+
 oc policy add-role-to-user admin ${USER} -n ${GUID}-nexus
 oc policy add-role-to-user admin ${USER} -n ${GUID}-sonarqube
 oc policy add-role-to-user admin ${USER} -n ${GUID}-jenkins
@@ -26,6 +29,3 @@ oc annotate namespace ${GUID}-sonarqube  openshift.io/requester=${USER} --overwr
 oc annotate namespace ${GUID}-jenkins    openshift.io/requester=${USER} --overwrite
 oc annotate namespace ${GUID}-parks-dev  openshift.io/requester=${USER} --overwrite
 oc annotate namespace ${GUID}-parks-prod openshift.io/requester=${USER} --overwrite
-
-oc policy add-role-to-user edit system:serviceaccount:${GUID}-jenkins:jenkins -n ${GUID}-tasks-dev
-oc policy add-role-to-user edit system:serviceaccount:${GUID}-jenkins:jenkins -n ${GUID}-tasks-dev
