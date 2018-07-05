@@ -1,0 +1,43 @@
+apiVersion: v1
+items:
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: appdev-mitzicom
+    name: appdev-mitzicom
+  spec:
+    nodeSelector: null
+    output:
+      to:
+        kind: ImageStreamTag
+        name: appdev-mitzicom:latest
+    postCommit: {}
+    resources: {}
+    source:
+      git:
+        uri: https://github.com/franredhat/appdev-mitzicom.git
+      type: Git
+    strategy:
+      dockerStrategy:
+        from:
+          kind: ImageStreamTag
+          name: jenkins-slave-maven-centos7:v3.9
+      type: Docker
+    triggers:
+    - github:
+        secret: p5WaTsiNeleBT7DD9oE9
+      type: GitHub
+    - generic:
+        secret: tgLBJU4vP6vbXiFFrv-9
+      type: Generic
+    - type: ConfigChange
+    - imageChange: {}
+      type: ImageChange
+  status:
+    lastVersion: 0
+kind: List
+metadata: {}
