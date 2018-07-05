@@ -32,6 +32,7 @@ podTemplate(
       sh "mvn -s ../nexus_settings.xml deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::http://nexus3-${GUID}-nexus.apps.na39.openshift.opentlc.com/repository/releases"
       
       echo "Building container image MLBParks:0.0-0"
+      sh "ls ./target/ | grep .war"
       sh "oc start-build mlbparks --follow --from-file=./target/mlbparks.war -n ${GUID}-parks-dev"
       openshiftTag alias: 'false', destStream: 'MLBParks', destTag: 0.0-0, destinationNamespace: "${GUID}-parks-dev", namespace: "${GUID}-parks-dev", srcStream: 'MLBParks', srcTag: 'latest', verbose: 'false'
       echo "Publishing MLBParks to Nexus"
