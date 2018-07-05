@@ -17,7 +17,9 @@ podTemplate(
     echo "GUID: ${GUID}"
     git 'https://github.com/franredhat/appdev-mitzicom.git'
     echo "Packaging MLBParks"
-    sh "cd MLBParks"
+    dir ('MLBParks') {
+      sh 'pwd; ls'
+    }
     sh "mvn -s nexus_settings.xml clean package -DskipTests=true"
     echo "MLBParks unit tests"
     sh "mvn -s nexus_settings.xml test"
