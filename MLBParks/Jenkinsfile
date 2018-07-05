@@ -18,7 +18,7 @@ podTemplate(
     echo "Configuring Nexus with repositories"
     sh "curl -o setup_nexus3.sh -s https://raw.githubusercontent.com/wkulhanek/ocp_advanced_development_resources/master/nexus/setup_nexus3.sh"
     sh "chmod +x setup_nexus3.sh"
-    sh "./setup_nexus3.sh admin admin123 http://nexus-${GUID}-nexus.apps.na39.openshift.opentlc.com"
+    sh "./setup_nexus3.sh admin admin123 http://nexus3-${GUID}-nexus.apps.na39.openshift.opentlc.com"
     sh "rm setup_nexus3.sh"
     git 'https://github.com/franredhat/appdev-mitzicom.git'
     echo "Changing to MLBParks dir"
@@ -30,7 +30,7 @@ podTemplate(
       sh "mvn -s ../nexus_settings.xml test"
     
       echo "Running MLBParks Code Analyses"
-      sh "mvn -s ../nexus_settings.xml deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::http://nexus-${GUID}-nexus.apps.na39.openshift.opentlc.com/repository/releases"
+      sh "mvn -s ../nexus_settings.xml deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::http://nexus3-${GUID}-nexus.apps.na39.openshift.opentlc.com/repository/releases"
     }
     
     echo "Building container image MLBParks:0.0-0"
@@ -38,7 +38,7 @@ podTemplate(
     openshiftTag alias: 'false', destStream: 'MLBParks', destTag: 0.0-0, destinationNamespace: "${GUID}-parks-dev", namespace: "${GUID}-parks-dev", srcStream: 'MLBParks', srcTag: 'latest', verbose: 'false'
 
     echo "Publishing MLBParks to Nexus"
-    sh "mvn -s https://raw.githubusercontent.com/franredhat/appdev-mitzicom/master/nexus_settings.xml deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::http://nexus-${GUID}-nexus.apps.na39.openshift.opentlc.com/repository/releases"
+    sh "mvn -s https://raw.githubusercontent.com/franredhat/appdev-mitzicom/master/nexus_settings.xml deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::http://nexus3-${GUID}-nexus.apps.na39.openshift.opentlc.com/repository/releases"
 
     echo "Deploying container image to Development Project"
     sh "oc set image dc/mlbparks mlbparks=docker-registry.default.svc:5000/${GUID}-parks-dev/mlbparks:0.0-0 -n ${GUID}-parks-dev"
