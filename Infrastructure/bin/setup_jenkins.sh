@@ -17,7 +17,6 @@ oc new-app jenkins-persistent --param ENABLE_OAUTH=true --param MEMORY_LIMIT=2Gi
 # Docker build alternative with new-app
 
 oc new-app --strategy=docker https://github.com/franredhat/appdev-mitzicom.git -n ${GUID}-jenkins
-oc scale dc/appdev-mitzicom --replicas=0
 
 # Jenkins File Build config
 
@@ -25,6 +24,7 @@ oc create -f https://raw.githubusercontent.com/franredhat/appdev-mitzicom/master
 oc create -f https://raw.githubusercontent.com/franredhat/appdev-mitzicom/master/Infrastructure/templates/mlbparks-pipeline-buildconfig.yaml -n ${GUID}-jenkins
 oc create -f https://raw.githubusercontent.com/franredhat/appdev-mitzicom/master/Infrastructure/templates/parksmap-pipeline-buildconfig.yaml -n ${GUID}-jenkins
 
+oc scale dc/appdev-mitzicom --replicas=0
 
 # Code to set up the Jenkins project to execute the
 # three pipelines.
