@@ -15,8 +15,8 @@ oc new-project ${GUID}-jenkins    --display-name="${GUID} AdvDev Homework Jenkin
 oc new-project ${GUID}-parks-dev  --display-name="${GUID} AdvDev Homework Parks Development"
 oc new-project ${GUID}-parks-prod --display-name="${GUID} AdvDev Homework Parks Production"
 
-oc policy add-role-to-user edit system:serviceaccount:${GUID}-jenkins:jenkins -n ${GUID}-tasks-dev
-oc policy add-role-to-user edit system:serviceaccount:${GUID}-jenkins:jenkins -n ${GUID}-tasks-dev
+oc policy add-role-to-user edit system:serviceaccount:${GUID}-jenkins:jenkins -n ${GUID}-parks-dev
+oc policy add-role-to-user edit system:serviceaccount:${GUID}-jenkins:jenkins -n ${GUID}-parks-dev
 
 oc policy add-role-to-user admin ${USER} -n ${GUID}-nexus
 oc policy add-role-to-user admin ${USER} -n ${GUID}-sonarqube
