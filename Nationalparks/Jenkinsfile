@@ -15,7 +15,7 @@ podTemplate(
   node('skopeo-pod') {
     def GUID = "frodrigu"
     echo "GUID: ${GUID}"
-    echo "Configuring Nexus with Wolfgang repositories"
+    echo "Wolfgang Nexus configuration"
     sh "curl -o setup_nexus3.sh -s https://raw.githubusercontent.com/wkulhanek/ocp_advanced_development_resources/master/nexus/setup_nexus3.sh"
     sh "chmod +x setup_nexus3.sh"
     sh "./setup_nexus3.sh admin admin123 http://nexus3-${GUID}-nexus.apps.na39.openshift.opentlc.com"
