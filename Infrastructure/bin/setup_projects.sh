@@ -26,3 +26,6 @@ oc annotate namespace ${GUID}-sonarqube  openshift.io/requester=${USER} --overwr
 oc annotate namespace ${GUID}-jenkins    openshift.io/requester=${USER} --overwrite
 oc annotate namespace ${GUID}-parks-dev  openshift.io/requester=${USER} --overwrite
 oc annotate namespace ${GUID}-parks-prod openshift.io/requester=${USER} --overwrite
+
+oc policy add-role-to-user edit system:serviceaccount:${GUID}-jenkins:jenkins -n ${GUID}-tasks-dev
+oc policy add-role-to-user edit system:serviceaccount:${GUID}-jenkins:jenkins -n ${GUID}-tasks-dev
