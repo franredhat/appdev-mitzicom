@@ -24,8 +24,6 @@ oc create -f https://raw.githubusercontent.com/franredhat/appdev-mitzicom/master
 oc create -f https://raw.githubusercontent.com/franredhat/appdev-mitzicom/master/Infrastructure/templates/mlbparks-pipeline-buildconfig.yaml -n ${GUID}-jenkins
 oc create -f https://raw.githubusercontent.com/franredhat/appdev-mitzicom/master/Infrastructure/templates/parksmap-pipeline-buildconfig.yaml -n ${GUID}-jenkins
 
-oc scale dc/appdev-mitzicom --replicas=0
-
 # Code to set up the Jenkins project to execute the
 # three pipelines.
 # This will need to also build the custom Maven Slave Pod
