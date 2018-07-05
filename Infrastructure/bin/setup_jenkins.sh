@@ -16,7 +16,7 @@ oc new-app jenkins-persistent --param ENABLE_OAUTH=true --param MEMORY_LIMIT=2Gi
 
 # Docker build alternative with new-app
 
-oc new-app --strategy=docker https://github.com/franredhat/appdev-mitzicom.git -n ${GUID}-jenkins
+oc create -f https://raw.githubusercontent.com/franredhat/appdev-mitzicom/master/Infrastructure/templates/jenkins-slave-maven-centos7.yaml -n ${GUID}-jenkins
 
 # Jenkins File Build config
 
