@@ -18,8 +18,8 @@ echo "Creating MLBParks base app"
 oc new-build --binary=true --name="mlbparks" jboss-eap70-openshift:1.7 -n ${GUID}-parks-dev
 oc new-app ${GUID}-parks-dev/mlbparks:0.0-0 --name=mlbparks --allow-missing-imagestream-tags=true -n ${GUID}-parks-dev
 oc set triggers dc/mlbparks --remove-all -n ${GUID}-parks-dev
-oc expose dc mlbparks --port 8080 -n ${GUID}-tasks-dev
-oc expose svc mlbparks -n ${GUID}-tasks-dev
+oc expose dc mlbparks --port 8080 -n ${GUID}-parks-dev
+oc expose svc mlbparks -n ${GUID}-parks-dev
 
 echo "Creating Nationalparks base app"
 oc new-build --binary=true --name="nationalparks" redhat-openjdk18-openshift:1.2 -n ${GUID}-parks-dev
