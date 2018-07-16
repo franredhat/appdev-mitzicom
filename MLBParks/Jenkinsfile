@@ -18,35 +18,60 @@ podTemplate(
     def devTag  = "0.0-0"
     // Set the tag for the production image: version
     def prodTag = "0.0"
-    echo "GUID: ${GUID}"
-    echo "Wolfgang Nexus configuration"
-    sh "curl -o setup_nexus3.sh -s https://raw.githubusercontent.com/wkulhanek/ocp_advanced_development_resources/master/nexus/setup_nexus3.sh"
-    sh "chmod +x setup_nexus3.sh"
-    sh "./setup_nexus3.sh admin admin123 http://nexus3-${GUID}-nexus.apps.na39.openshift.opentlc.com"
-    sh "rm setup_nexus3.sh"
-    git 'https://github.com/franredhat/appdev-mitzicom.git'
+    
+    stage('Nexus Needed Configuration for the Artifacts Generated') {
+      echo "GUID: ${GUID}"
+      echo "---> Wolfgang Nexus configuration"
+      sh "curl -o setup_nexus3.sh -s https://raw.githubusercontent.com/wkulhanek/ocp_advanced_development_resources/master/nexus/setup_nexus3.sh"
+      sh "chmod +x setup_nexus3.sh"
+      sh "./setup_nexus3.sh admin admin123 http://nexus3-${GUID}-nexus.apps.na39.openshift.opentlc.com"
+      sh "rm setup_nexus3.sh"
+    }
+    
+    stage('Checkout Source') {
+      git 'https://github.com/franredhat/appdev-mitzicom.git'
+    }
+    
     echo "Changing to MLBParks dir"
     dir ('MLBParks') {
-      sh 'pwd; ls'
-      echo "Packaging MLBParks"
-      sh "mvn -s ../nexus_settings.xml clean package -DskipTests=true"
-      //echo "MLBParks unit tests"
-      //sh "mvn -s ../nexus_settings.xml test"    
-      echo "Publishing MLBParks to Nexus"
-      sh "mvn -s ../nexus_settings.xml deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::http://nexus3-${GUID}-nexus.apps.na39.openshift.opentlc.com/repository/releases"
-      echo "Running MLBParks Code Analyses"
-      sh "echo ${JOB_BASE_NAME}"
-      //sh "mvn -s ../nexus_settings.xml admin:admin -Dsonar.host.url=http://sonarqube-${GUID}-sonarqube.apps.na39.openshift.opentlc.com/ -Dsonar.projectName=${JOB_BASE_NAME}-${devTag}"
       
-      echo "Building container image MLBParks:0.0-0"
-      sh "ls ./target/ | grep .war"
-      sh "oc start-build mlbparks --follow --from-file=./target/mlbparks.war -n ${GUID}-parks-dev"
-      openshiftTag alias: 'false', destStream: 'mlbparks', destTag: devTag, destinationNamespace: "${GUID}-parks-dev", namespace: "${GUID}-parks-dev", srcStream: 'mlbparks', srcTag: 'latest', verbose: 'false'
-      echo "Deploying container image to Development Project"
-      sh "oc set image dc/mlbparks mlbparks=docker-registry.default.svc:5000/${GUID}-parks-dev/mlbparks:${devTag} -n ${GUID}-parks-dev"
-      openshiftDeploy depCfg: 'mlbparks', namespace: "${GUID}-parks-dev", verbose: 'false', waitTime: '', waitUnit: 'sec'
-      echo "Running integration tests"
-      curl "http://mlbparks-${GUID}-parks-dev.apps.na39.openshift.opentlc.com/ws/data/load/" 
+      stage('Build war') {
+        sh 'pwd; ls'
+        echo "Packaging MLBParks"
+        sh "mvn -s ../nexus_settings.xml clean package -DskipTests=true"
+      }
+      
+      stage('Unit Tests') {
+        echo "MLBParks unit tests"
+        sh "mvn -s ../nexus_settings.xml test"    
+      }
+      
+        //echo "Running MLBParks Code Analyses"
+        //sh "echo ${JOB_BASE_NAME}"
+        //sh "mvn -s ../nexus_settings.xml admin:admin -Dsonar.host.url=http://sonarqube-${GUID}-sonarqube.apps.na39.openshift.opentlc.com/ -Dsonar.projectName=${JOB_BASE_NAME}-${devTag}"
+      
+      stage('Publish to Nexus') {
+        echo "Publishing MLBParks to Nexus"
+        sh "mvn -s ../nexus_settings.xml deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::http://nexus3-${GUID}-nexus.apps.na39.openshift.opentlc.com/repository/releases"
+      }
+      
+      stage('Build and Tag OpenShift Image') {
+        echo "Building container image MLBParks:0.0-0"
+        sh "ls ./target/ | grep .war"
+        sh "oc start-build mlbparks --follow --from-file=./target/mlbparks.war -n ${GUID}-parks-dev"
+        openshiftTag alias: 'false', destStream: 'mlbparks', destTag: devTag, destinationNamespace: "${GUID}-parks-dev", namespace: "${GUID}-parks-dev", srcStream: 'mlbparks', srcTag: 'latest', verbose: 'false'
+      }
+      
+      stage('Deploy to Dev') {
+        echo "Deploying container image to Development Project"
+        sh "oc set image dc/mlbparks mlbparks=docker-registry.default.svc:5000/${GUID}-parks-dev/mlbparks:${devTag} -n ${GUID}-parks-dev"
+        openshiftDeploy depCfg: 'mlbparks', namespace: "${GUID}-parks-dev", verbose: 'false', waitTime: '', waitUnit: 'sec'
+      }
+      
+      stage('Integration Tests') {
+        echo "Running integration tests"
+        curl "http://mlbparks-${GUID}-parks-dev.apps.na39.openshift.opentlc.com/ws/data/load/" 
+      }
     }
   }
 }
