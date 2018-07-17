@@ -13,51 +13,85 @@ podTemplate(
   ]
 ) {
   node('skopeo-pod') {
+    
+    // Jenkinsfile for MLBParks
+podTemplate(
+  label: "skopeo-pod",
+  cloud: "openshift",
+  inheritFrom: "maven",
+  containers: [
+    containerTemplate(
+      name: "jnlp",
+      image: "docker-registry.default.svc:5000/frodrigu-jenkins/jenkins-slave-maven-centos7:v3.9",
+      resourceRequestMemory: "1Gi",
+      resourceLimitMemory: "2Gi"
+    )
+  ]
+) {
+  node('skopeo-pod') {
     def GUID = "frodrigu"
-    echo "GUID: ${GUID}"
-    echo "Wolfgang Nexus configuration"
-    sh "curl -o setup_nexus3.sh -s https://raw.githubusercontent.com/wkulhanek/ocp_advanced_development_resources/master/nexus/setup_nexus3.sh"
-    sh "chmod +x setup_nexus3.sh"
-    sh "./setup_nexus3.sh admin admin123 http://nexus3-${GUID}-nexus.apps.na39.openshift.opentlc.com"
-    sh "rm setup_nexus3.sh"
-    git 'https://github.com/franredhat/appdev-mitzicom.git'
-    echo "Packaging Nationalparks"
-    dir ('MLBParks') {
-      sh 'pwd; ls'
+    // Set the tag for the development image: version + build number
+    def devTag  = "0.0-0"
+    // Set the tag for the production image: version
+    def prodTag = "0.0"
+    
+    stage('Nexus Needed Configuration for the Artifacts Generated') {
+      echo "GUID: ${GUID}"
+      echo "---> Wolfgang Nexus configuration"
+      sh "curl -o setup_nexus3.sh -s https://raw.githubusercontent.com/wkulhanek/ocp_advanced_development_resources/master/nexus/setup_nexus3.sh"
+      sh "chmod +x setup_nexus3.sh"
+      sh "./setup_nexus3.sh admin admin123 http://nexus3-${GUID}-nexus.apps.na39.openshift.opentlc.com"
+      sh "rm setup_nexus3.sh"
+    }
+    
+    stage('Checkout Source') {
       git 'https://github.com/franredhat/appdev-mitzicom.git'
-      sh "cd Nationalparks"
-      sh "mvn -s ../nexus_settings.xml clean package -DskipTests=true"
-      echo "Nationalparks unit tests"
-      sh "mvn -s ../nexus_settings.xml test"
-      echo "Running Nationalparks Code Analyses"
-      sh "mvn -s ../nexus_settings.xml deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::http://nexus3-${GUID}-nexus.apps.na39.openshift.opentlc.com/repository/releases"
+    }
+    
+    echo "Changing to Nationalparks dir"
+    dir ('Nationalparks') {
       
-      echo "Building container image Nationalparks:0.0-0"
-      sh "oc start-build Nationalparks --follow --from-file=./target/nationalparks.war -n ${GUID}-parks-dev"
-      openshiftTag alias: 'false', destStream: 'Nationalparks', destTag: 0.0-0, destinationNamespace: "${GUID}-parks-dev", namespace: "${GUID}-parks-dev", srcStream: 'Nationalparks', srcTag: 'latest', verbose: 'false'
-      echo "Publishing Nationalparks to Nexus"
-      sh "ls ./target/ | grep .war"
-      sh "mvn -s ../nexus_settings.xml deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::http://nexus3-${GUID}-nexus.apps.na39.openshift.opentlc.com/repository/releases"
-      echo "Deploying container image to Development Project"
-      sh "oc set image dc/nationalparks nationalparks=docker-registry.default.svc:5000/${GUID}-parks-dev/nationalparks:0.0-0 -n ${GUID}-parks-dev"
-      openshiftDeploy depCfg: 'nationalparks', namespace: "${GUID}-parks-dev", verbose: 'false', waitTime: '', waitUnit: 'sec'
-      echo "Running integration tests"
-      curl "http://nationalparks-${GUID}-parks-dev.apps.na39.openshift.opentlc.com/ws/data/load/" 
+      stage('Build war') {
+        sh 'pwd; ls'
+        echo "Packaging Nationalparks"
+        sh "mvn -s ../nexus_settings.xml clean package -DskipTests=true"
+      }
+      
+      stage('Unit Tests') {
+        echo "MLBParks unit tests"
+        sh "mvn -s ../nexus_settings.xml test"    
+      }
+      
+        //echo "Running MLBParks Code Analyses"
+        //sh "echo ${JOB_BASE_NAME}"
+        //sh "mvn -s ../nexus_settings.xml admin:admin -Dsonar.host.url=http://sonarqube-${GUID}-sonarqube.apps.na39.openshift.opentlc.com/ -Dsonar.projectName=${JOB_BASE_NAME}-${devTag}"
+      
+      stage('Publish to Nexus') {
+        echo "Publishing Nationalparks to Nexus"
+        sh "mvn -s ../nexus_settings.xml deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::http://nexus3-${GUID}-nexus.apps.na39.openshift.opentlc.com/repository/releases"
+      }
+      
+      stage('Build and Tag OpenShift Image') {
+        echo "Building container image Nationalparks:0.0-0"
+        sh "ls ./target/ | grep .war"
+        sh "oc start-build nationalparks --follow --from-file=./target/nationalparks.war -n ${GUID}-parks-dev"
+        openshiftTag alias: 'false', destStream: 'nationalparks', destTag: devTag, destinationNamespace: "${GUID}-parks-dev", namespace: "${GUID}-parks-dev", srcStream: 'nationalparks', srcTag: 'latest', verbose: 'false'
+      }
+      
+      stage('Deploy to Dev') {
+        echo "Deploying container image to Development Project"
+        sh "oc set image dc/nationalparks nationalparks=docker-registry.default.svc:5000/${GUID}-parks-dev/nationalparks:${devTag} -n ${GUID}-parks-dev"
+        openshiftDeploy depCfg: 'nationalparks', namespace: "${GUID}-parks-dev", verbose: 'false', waitTime: '', waitUnit: 'sec'
+      }
+      
+      stage('Waiting to launch Integration Tests') {
+        sleep 60
+      }
+      
+      stage('Setting Up Integration Tests as Hook') {
+        echo "Configuring integration tests"
+        curl "http://nationalparks-${GUID}-parks-dev.apps.na39.openshift.opentlc.com/ws/data/load/"
+      }
     }
   }
-}
-
-// Convenience Functions to read variables from the pom.xml
-// Do not change anything below this line.
-def getVersionFromPom(pom) {
-  def matcher = readFile(pom) =~ '<version>(.+)</version>'
-  matcher ? matcher[0][1] : null
-}
-def getGroupIdFromPom(pom) {
-  def matcher = readFile(pom) =~ '<groupId>(.+)</groupId>'
-  matcher ? matcher[0][1] : null
-}
-def getArtifactIdFromPom(pom) {
-  def matcher = readFile(pom) =~ '<artifactId>(.+)</artifactId>'
-  matcher ? matcher[0][1] : null
 }
