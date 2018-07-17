@@ -42,11 +42,11 @@ podTemplate(
       }
       
       stage('Unit Tests') {
-        echo "MLBParks unit tests"
+        echo "Nationalparks unit tests"
         sh "mvn -s ../nexus_settings.xml test"    
       }
       
-        //echo "Running MLBParks Code Analyses"
+        //echo "Running Nationalparks Code Analyses"
         //sh "echo ${JOB_BASE_NAME}"
         //sh "mvn -s ../nexus_settings.xml admin:admin -Dsonar.host.url=http://sonarqube-${GUID}-sonarqube.apps.na39.openshift.opentlc.com/ -Dsonar.projectName=${JOB_BASE_NAME}-${devTag}"
       
@@ -58,7 +58,7 @@ podTemplate(
       stage('Build and Tag OpenShift Image') {
         echo "Building container image Nationalparks:0.0-0"
         sh "ls ./target/ | grep .war"
-        sh "oc start-build nationalparks --follow --from-file=./target/nationalparks.war -n ${GUID}-parks-dev"
+        sh "oc start-build nationalparks --from-file=./target/nationalparks.war -n ${GUID}-parks-dev"
         openshiftTag alias: 'false', destStream: 'nationalparks', destTag: devTag, destinationNamespace: "${GUID}-parks-dev", namespace: "${GUID}-parks-dev", srcStream: 'nationalparks', srcTag: 'latest', verbose: 'false'
       }
       
