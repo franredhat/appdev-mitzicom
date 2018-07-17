@@ -68,10 +68,6 @@ podTemplate(
         openshiftDeploy depCfg: 'nationalparks', namespace: "${GUID}-parks-dev", verbose: 'false', waitTime: '', waitUnit: 'sec'
       }
       
-      stage('Waiting to launch Integration Tests') {
-        sleep 60
-      }
-      
       stage('Setting Up Integration Tests as Hook') {
         echo "Configuring integration tests"
         curl "http://nationalparks-${GUID}-parks-dev.apps.na39.openshift.opentlc.com/ws/data/load/"
