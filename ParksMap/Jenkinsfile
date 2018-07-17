@@ -22,14 +22,13 @@ podTemplate(
     sh "rm setup_nexus3.sh"
     git 'https://github.com/franredhat/appdev-mitzicom.git'
     echo "Changing to MLBParks dir"
-    dir ('MLBParks') {
+    dir ('ParksMap') {
       sh 'pwd; ls'
       def GUID = "frodrigu"
       echo "GUID: ${GUID}"
       git 'https://github.com/franredhat/appdev-mitzicom.git'
       echo "Packaging ParksMap"
-      sh "cd ParksMap"
-      sh "mvn -s ../nexus_settings.xml clean package -DskipTests=true"
+      mvn -s ../nexus_settings.xml clean package spring-boot:repackage -DskipTests -Dcom.redhat.xpaas.repo.redhatga
       //echo "ParksMap unit tests"
       //sh "mvn -s ../nexus_settings.xml test"
       echo "Running ParksMap Code Analyses"
@@ -44,23 +43,8 @@ podTemplate(
       echo "Deploying container image to Development Project"
       sh "oc set image dc/parksmap parksmap=docker-registry.default.svc:5000/${GUID}-parks-dev/parksmap:0.0-0 -n ${GUID}-parks-dev"
       openshiftDeploy depCfg: 'parksmap', namespace: "${GUID}-parks-dev", verbose: 'false', waitTime: '', waitUnit: 'sec'
-      echo "Running integration tests"
-      curl "http://parksmap-${GUID}-parks-dev.apps.na39.openshift.opentlc.com/ws/data/load/" 
+      echo "Setting permissions"
+      sh "oc policy add-role-to-user view --serviceaccount=default -n ${GUID}-parks-dev"
     }
   }
-}
-
-// Convenience Functions to read variables from the pom.xml
-// Do not change anything below this line.
-def getVersionFromPom(pom) {
-  def matcher = readFile(pom) =~ '<version>(.+)</version>'
-  matcher ? matcher[0][1] : null
-}
-def getGroupIdFromPom(pom) {
-  def matcher = readFile(pom) =~ '<groupId>(.+)</groupId>'
-  matcher ? matcher[0][1] : null
-}
-def getArtifactIdFromPom(pom) {
-  def matcher = readFile(pom) =~ '<artifactId>(.+)</artifactId>'
-  matcher ? matcher[0][1] : null
 }
