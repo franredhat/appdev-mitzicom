@@ -13,22 +13,6 @@ podTemplate(
   ]
 ) {
   node('skopeo-pod') {
-    
-    // Jenkinsfile for MLBParks
-podTemplate(
-  label: "skopeo-pod",
-  cloud: "openshift",
-  inheritFrom: "maven",
-  containers: [
-    containerTemplate(
-      name: "jnlp",
-      image: "docker-registry.default.svc:5000/frodrigu-jenkins/jenkins-slave-maven-centos7:v3.9",
-      resourceRequestMemory: "1Gi",
-      resourceLimitMemory: "2Gi"
-    )
-  ]
-) {
-  node('skopeo-pod') {
     def GUID = "frodrigu"
     // Set the tag for the development image: version + build number
     def devTag  = "0.0-0"
