@@ -29,8 +29,6 @@ podTemplate(
       git 'https://github.com/franredhat/appdev-mitzicom.git'
       echo "Packaging ParksMap"
       mvn -s ../nexus_settings.xml clean package spring-boot:repackage -DskipTests -Dcom.redhat.xpaas.repo.redhatga
-      //echo "ParksMap unit tests"
-      //sh "mvn -s ../nexus_settings.xml test"
       echo "Running ParksMap Code Analyses"
       sh "mvn -s ../nexus_settings.xml deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::http://nexus3-${GUID}-nexus.apps.na39.openshift.opentlc.com/repository/releases"
       
