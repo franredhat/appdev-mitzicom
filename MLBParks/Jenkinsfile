@@ -70,7 +70,7 @@ podTemplate(
       
       stage('Setting Up Integration Tests as Hook') {
         echo "Configuring integration tests"
-        sh "oc set build-hook bc/mlbparks --post-commit --script='http://mlbparks-frodrigu-parks-dev.apps.na39.openshift.opentlc.com/ws/data/load/'"
+        sh "oc set build-hook bc/mlbparks --post-commit --script='curl http://mlbparks-${GUID}-parks-dev.apps.na39.openshift.opentlc.com/ws/data/load/'"
         sh "oc start-build bc/mlbparks"
       }
     }
