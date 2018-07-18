@@ -68,6 +68,14 @@ podTemplate(
         openshiftDeploy depCfg: 'mlbparks', namespace: "${GUID}-parks-dev", verbose: 'false', waitTime: '', waitUnit: 'sec'
       }
       
+      stage ('Setting Environment Variables') {
+        echo "Setting Environment Variables"
+        sh "oc create configmap env --from-literal DB_HOST=mongodb --from-literal DB_PORT=27017 --from-literal DB_USERNAME=mongodb --from-literal DB_PASSWORD=mongodb --from-literal DB_NAME=parks --from-literal DB_REPLICASET=rs0"
+        sh "oc set env dc/mlbparks --from=configmap/env"
+        sh "oc rollout latest dc/mlbparks"
+      }
+        
+      
       stage('Waiting to launch Integration Tests') {
         sleep 60
       }
