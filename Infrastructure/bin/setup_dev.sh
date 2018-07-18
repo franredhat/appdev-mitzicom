@@ -35,3 +35,6 @@ oc set triggers dc/parksmap --remove-all -n ${GUID}-parks-dev
 oc expose dc parksmap -n ${GUID}-parks-dev
 oc expose svc parksmap -n ${GUID}-parks-dev
 oc policy add-role-to-user view --serviceaccount=default -n ${GUID}-parks-dev
+
+echo "Creating ConfigMap for Back End Applications"
+oc create configmap env --from-literal DB_HOST=mongodb --from-literal DB_PORT=27017 --from-literal DB_USERNAME=mongodb --from-literal DB_PASSWORD=mongodb --from-literal DB_NAME=parks --from-literal DB_REPLICASET=rs0
