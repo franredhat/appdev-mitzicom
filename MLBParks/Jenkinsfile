@@ -77,7 +77,7 @@ podTemplate(
         
       
       stage('Waiting to launch Integration Tests') {
-        sleep 60
+        sleep 90
       }
       
       stage('Setting Up Integration Tests') {
