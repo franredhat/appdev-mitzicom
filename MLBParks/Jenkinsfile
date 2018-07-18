@@ -75,6 +75,7 @@ podTemplate(
       
       stage('Setting Up Integration Tests') {
         echo "Configuring integration tests"
+        sh "oc label svc mlbparks type=parksmap-backend"
         sh 'curl "http://mlbparks-${GUID}-parks-dev.apps.na39.openshift.opentlc.com/ws/data/load/"'
       }
     }
