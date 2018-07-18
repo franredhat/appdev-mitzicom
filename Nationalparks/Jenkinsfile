@@ -14,9 +14,7 @@ podTemplate(
 ) {
   node('skopeo-pod') {
     def GUID = "frodrigu"
-    // Set the tag for the development image: version + build number
     def devTag  = "0.0-0"
-    // Set the tag for the production image: version
     def prodTag = "0.0"
     
     stage('Nexus Needed Configuration for the Artifacts Generated') {
@@ -45,11 +43,7 @@ podTemplate(
         echo "Nationalparks unit tests"
         sh "mvn -s ../nexus_settings.xml test"    
       }
-      
-        //echo "Running Nationalparks Code Analyses"
-        //sh "echo ${JOB_BASE_NAME}"
-        //sh "mvn -s ../nexus_settings.xml admin:admin -Dsonar.host.url=http://sonarqube-${GUID}-sonarqube.apps.na39.openshift.opentlc.com/ -Dsonar.projectName=${JOB_BASE_NAME}-${devTag}"
-      
+
       stage('Publish to Nexus') {
         echo "Publishing Nationalparks to Nexus"
         sh "mvn -s ../nexus_settings.xml deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::http://nexus3-${GUID}-nexus.apps.na39.openshift.opentlc.com/repository/releases"
@@ -61,15 +55,20 @@ podTemplate(
         openshiftTag alias: 'false', destStream: 'nationalparks', destTag: devTag, destinationNamespace: "${GUID}-parks-dev", namespace: "${GUID}-parks-dev", srcStream: 'nationalparks', srcTag: 'latest', verbose: 'false'
       }
       
-      stage('Deploy to Dev') {
-        echo "Deploying container image to Development Project"
-        sh "oc set image dc/nationalparks nationalparks=docker-registry.default.svc:5000/${GUID}-parks-dev/nationalparks:${devTag} -n ${GUID}-parks-dev"
-        openshiftDeploy depCfg: 'nationalparks', namespace: "${GUID}-parks-dev", verbose: 'false', waitTime: '', waitUnit: 'sec'
+      stage ('Setting Environment Variables') {
+        echo "Setting Environment Variables"
+        sh "oc create configmap env --from-literal DB_HOST=mongodb --from-literal DB_PORT=27017 --from-literal DB_USERNAME=mongodb --from-literal DB_PASSWORD=mongodb --from-literal DB_NAME=parks --from-literal DB_REPLICASET=rs0"
+        sh "oc set env dc/mlbparks --from=configmap/env"
+        sh "oc rollout latest dc/mlbparks"
       }
       
-      stage('Setting Up Integration Tests as Hook') {
+      stage('Waiting to launch Integration Tests') {
+        sleep 90
+      }
+      
+      stage('Setting Up Integration Tests') {
         echo "Configuring integration tests"
-        curl "http://nationalparks-${GUID}-parks-dev.apps.na39.openshift.opentlc.com/ws/data/load/"
+        sh 'curl "http://mlbparks-${GUID}-parks-dev.apps.na39.openshift.opentlc.com/ws/data/load/"'
       }
     }
   }
