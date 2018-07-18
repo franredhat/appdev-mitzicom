@@ -35,7 +35,7 @@ podTemplate(
       
       stage('Build jar') {
         echo "Packaging Parksmap"
-        mvn -s ../nexus_settings.xml clean package spring-boot:repackage -DskipTests -Dcom.redhat.xpaas.repo.redhatga
+        sh "mvn -s ../nexus_settings.xml clean package spring-boot:repackage -DskipTests -Dcom.redhat.xpaas.repo.redhatga"
       }
 
       stage('Publish to Nexus') {
