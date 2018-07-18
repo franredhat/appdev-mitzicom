@@ -57,7 +57,6 @@ podTemplate(
       
       stage ('Setting Environment Variables') {
         echo "Setting Environment Variables"
-        sh "oc create configmap env --from-literal DB_HOST=mongodb --from-literal DB_PORT=27017 --from-literal DB_USERNAME=mongodb --from-literal DB_PASSWORD=mongodb --from-literal DB_NAME=parks --from-literal DB_REPLICASET=rs0 -n ${GUID}-parks-dev"
         sh "oc set env dc/nationalparks --from=configmap/env -n ${GUID}-parks-dev"
         sh "oc rollout latest dc/nationalparks -n ${GUID}-parks-dev"
       }
