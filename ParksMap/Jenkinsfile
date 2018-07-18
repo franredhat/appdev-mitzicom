@@ -40,7 +40,7 @@ podTemplate(
 
       stage('Publish to Nexus') {
         echo "Publishing Parksmap to Nexus"
-        sh "mvn -s ../nexus_settings.xml deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::http://nexus3-${GUID}-nexus.apps.na39.openshift.opentlc.com/repository/releases"
+        sh 'mvn -s ../nexus_settings.xml deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::http://nexus3-${GUID}-nexus.apps.na39.openshift.opentlc.com/repository/releases'
       }
       
       stage('Build and Tag OpenShift Image') {
@@ -62,7 +62,7 @@ podTemplate(
       }
       
       stage('Waiting to launch Integration Tests') {
-        sleep 90
+        sleep 30
       }
       
       stage('Setting Up Integration Tests') {
