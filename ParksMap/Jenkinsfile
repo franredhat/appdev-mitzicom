@@ -67,7 +67,7 @@ podTemplate(
       
       stage('Setting Up Integration Tests') {
         echo "Configuring integration tests"
-        sh "oc expose $(oc get pods -o name -n ${GUID}-parks-dev | grep -v build | grep parksmap) --name=parksmap --port=8080-n ${GUID}-parks-dev"
+        sh 'oc expose $(oc get pods -o name -n ${GUID}-parks-dev | grep -v build | grep parksmap) --name=parksmap --port=8080-n ${GUID}-parks-dev'
         sh "oc expose svc parksmap"
         sh "oc policy add-role-to-user view --serviceaccount=default -n ${GUID}-parks-dev"
       }
