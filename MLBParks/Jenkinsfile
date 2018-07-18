@@ -64,8 +64,8 @@ podTemplate(
       
       stage ('Setting Environment Variables') {
         echo "Setting Environment Variables"
-        sh "oc set env dc/mlbparks --from=configmap/env"
-        sh "oc rollout latest dc/mlbparks"
+        sh "oc set env dc/mlbparks --from=configmap/env -n ${GUID}-parks-dev"
+        sh "oc rollout latest dc/mlbparks -n ${GUID}-parks-dev"
       }
       
       stage('Waiting to launch Integration Tests') {
@@ -74,7 +74,7 @@ podTemplate(
       
       stage('Setting Up Integration Tests') {
         echo "Configuring integration tests"
-        sh "oc label svc mlbparks type=parksmap-backend"
+        sh "oc label svc mlbparks type=parksmap-backend -n ${GUID}-parks-dev"
         sh 'curl "http://mlbparks-${GUID}-parks-dev.apps.na39.openshift.opentlc.com/ws/data/load/"'
       }
     }
