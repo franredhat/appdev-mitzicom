@@ -14,9 +14,7 @@ podTemplate(
 ) {
   node('skopeo-pod') {
     def GUID = "frodrigu"
-    // Set the tag for the development image: version + build number
     def devTag  = "0.0-0"
-    // Set the tag for the production image: version
     def prodTag = "0.0"
     
     stage('Nexus Needed Configuration for the Artifacts Generated') {
@@ -46,10 +44,6 @@ podTemplate(
         sh "mvn -s ../nexus_settings.xml test"    
       }
       
-        //echo "Running MLBParks Code Analyses"
-        //sh "echo ${JOB_BASE_NAME}"
-        //sh "mvn -s ../nexus_settings.xml admin:admin -Dsonar.host.url=http://sonarqube-${GUID}-sonarqube.apps.na39.openshift.opentlc.com/ -Dsonar.projectName=${JOB_BASE_NAME}-${devTag}"
-      
       stage('Publish to Nexus') {
         echo "Publishing MLBParks to Nexus"
         sh "mvn -s ../nexus_settings.xml deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::http://nexus3-${GUID}-nexus.apps.na39.openshift.opentlc.com/repository/releases"
@@ -74,7 +68,6 @@ podTemplate(
         sh "oc set env dc/mlbparks --from=configmap/env"
         sh "oc rollout latest dc/mlbparks"
       }
-        
       
       stage('Waiting to launch Integration Tests') {
         sleep 90
