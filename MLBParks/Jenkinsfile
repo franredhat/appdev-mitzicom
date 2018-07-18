@@ -72,25 +72,10 @@ podTemplate(
         sleep 60
       }
       
-      stage('Setting Up Integration Tests as Hook') {
+      stage('Setting Up Integration Tests') {
         echo "Configuring integration tests"
-        curl "http://mlbparks-${GUID}-parks-dev.apps.na39.openshift.opentlc.com/ws/data/load/"
+        sh 'curl "http://mlbparks-${GUID}-parks-dev.apps.na39.openshift.opentlc.com/ws/data/load/"'
       }
     }
   }
-}
-
-// Convenience Functions to read variables from the pom.xml
-// Do not change anything below this line.
-def getVersionFromPom(pom) {
-  def matcher = readFile(pom) =~ '<version>(.+)</version>'
-  matcher ? matcher[0][1] : null
-}
-def getGroupIdFromPom(pom) {
-  def matcher = readFile(pom) =~ '<groupId>(.+)</groupId>'
-  matcher ? matcher[0][1] : null
-}
-def getArtifactIdFromPom(pom) {
-  def matcher = readFile(pom) =~ '<artifactId>(.+)</artifactId>'
-  matcher ? matcher[0][1] : null
 }
