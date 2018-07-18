@@ -14,35 +14,63 @@ podTemplate(
 ) {
   node('skopeo-pod') {
     def GUID = "frodrigu"
-    echo "GUID: ${GUID}"
-    echo "Wolfgang Nexus configuration"
-    sh "curl -o setup_nexus3.sh -s https://raw.githubusercontent.com/wkulhanek/ocp_advanced_development_resources/master/nexus/setup_nexus3.sh"
-    sh "chmod +x setup_nexus3.sh"
-    sh "./setup_nexus3.sh admin admin123 http://nexus3-${GUID}-nexus.apps.na39.openshift.opentlc.com"
-    sh "rm setup_nexus3.sh"
-    git 'https://github.com/franredhat/appdev-mitzicom.git'
-    echo "Changing to MLBParks dir"
-    dir ('ParksMap') {
-      sh 'pwd; ls'
-      def GUID = "frodrigu"
+    def devTag  = "0.0-0"
+    def prodTag = "0.0"
+    
+    stage('Nexus Needed Configuration for the Artifacts Generated') {
       echo "GUID: ${GUID}"
+      echo "---> Wolfgang Nexus configuration"
+      sh "curl -o setup_nexus3.sh -s https://raw.githubusercontent.com/wkulhanek/ocp_advanced_development_resources/master/nexus/setup_nexus3.sh"
+      sh "chmod +x setup_nexus3.sh"
+      sh "./setup_nexus3.sh admin admin123 http://nexus3-${GUID}-nexus.apps.na39.openshift.opentlc.com"
+      sh "rm setup_nexus3.sh"
+    }
+    
+    stage('Checkout Source') {
       git 'https://github.com/franredhat/appdev-mitzicom.git'
-      echo "Packaging ParksMap"
-      mvn -s ../nexus_settings.xml clean package spring-boot:repackage -DskipTests -Dcom.redhat.xpaas.repo.redhatga
-      echo "Running ParksMap Code Analyses"
-      sh "mvn -s ../nexus_settings.xml deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::http://nexus3-${GUID}-nexus.apps.na39.openshift.opentlc.com/repository/releases"
+    }
+    
+    echo "Changing to ParksMap dir"
+    dir ('ParksMap') {
       
-      echo "Building container image ParksMap:0.0-0"
-      sh "ls ./target/ | grep .war"
-      sh "oc start-build parksmap --follow --from-file=./target/parksmap.war -n ${GUID}-parks-dev"
-      openshiftTag alias: 'false', destStream: 'ParksMap', destTag: 0.0-0, destinationNamespace: "${GUID}-parks-dev", namespace: "${GUID}-parks-dev", srcStream: 'ParksMap', srcTag: 'latest', verbose: 'false'
-      echo "Publishing ParksMap to Nexus"
-      sh "mvn -s ../nexus_settings.xml deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::http://nexus3-${GUID}-nexus.apps.na39.openshift.opentlc.com/repository/releases"
-      echo "Deploying container image to Development Project"
-      sh "oc set image dc/parksmap parksmap=docker-registry.default.svc:5000/${GUID}-parks-dev/parksmap:0.0-0 -n ${GUID}-parks-dev"
-      openshiftDeploy depCfg: 'parksmap', namespace: "${GUID}-parks-dev", verbose: 'false', waitTime: '', waitUnit: 'sec'
-      echo "Setting permissions"
-      sh "oc policy add-role-to-user view --serviceaccount=default -n ${GUID}-parks-dev"
+      stage('Build jar') {
+        echo "Packaging Parksmap"
+        mvn -s ../nexus_settings.xml clean package spring-boot:repackage -DskipTests -Dcom.redhat.xpaas.repo.redhatga
+      }
+
+      stage('Publish to Nexus') {
+        echo "Publishing Parksmap to Nexus"
+        sh "mvn -s ../nexus_settings.xml deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::http://nexus3-${GUID}-nexus.apps.na39.openshift.opentlc.com/repository/releases"
+      }
+      
+      stage('Build and Tag OpenShift Image') {
+        echo "Building container image parksmap:0.0-0"
+        sh "oc start-build parksmap --follow --from-file=./target/parksmap.jar -n ${GUID}-parks-dev"
+        openshiftTag alias: 'false', destStream: 'parksmap', destTag: devTag, destinationNamespace: "${GUID}-parks-dev", namespace: "${GUID}-parks-dev", srcStream: 'parksmap', srcTag: 'latest', verbose: 'false'
+      }
+      
+      stage('Deploy to Dev') {
+        echo "Deploying container image to Development Project"
+        sh "oc set image dc/parksmap parksmap=docker-registry.default.svc:5000/${GUID}-parks-dev/parksmap:${devTag} -n ${GUID}-parks-dev"
+        openshiftDeploy depCfg: 'parksmap', namespace: "${GUID}-parks-dev", verbose: 'false', waitTime: '', waitUnit: 'sec'
+      }
+      
+      stage ('Setting Environment Variables') {
+        echo "Setting Environment Variables"
+        sh "oc set env dc/parksmap --from=configmap/env -n ${GUID}-parks-dev"
+        sh "oc rollout latest dc/parksmap -n ${GUID}-parks-dev"
+      }
+      
+      stage('Waiting to launch Integration Tests') {
+        sleep 90
+      }
+      
+      stage('Setting Up Integration Tests') {
+        echo "Configuring integration tests"
+        sh "oc expose $(oc get pods -o name -n ${GUID}-parks-dev | grep -v build | grep parksmap) --name=parksmap --port=8080-n ${GUID}-parks-dev"
+        sh "oc expose svc parksmap"
+        sh "oc policy add-role-to-user view --serviceaccount=default -n ${GUID}-parks-dev"
+      }
     }
   }
 }
