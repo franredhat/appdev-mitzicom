@@ -73,6 +73,9 @@ podTemplate(
       
       stage('Setting Up Integration Tests') {
         echo "Configuring integration tests"
+        sh "oc expose $(oc get pods -o name -n ${GUID}-parks-dev | grep -v build | grep nationalparks) --name=nationalparks --port=8080-n ${GUID}-parks-dev"
+        sh "oc label svc mlbparks type=parksmap-backend"
+        sh "oc expose svc nationalparks"
         sh 'curl "http://nationalparks-${GUID}-parks-dev.apps.na39.openshift.opentlc.com/ws/data/load/"'
       }
     }
